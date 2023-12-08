@@ -5,7 +5,7 @@ def transform_number_from_mapping(number, maps) -> int:
             break
     return number
 
-input = open('input', 'r')
+input = open('test', 'r')
 almanac = input.readlines()
 
 seedsInput = []
@@ -66,7 +66,6 @@ lowestLocation = 999999999999999999
 
 for index in range(int(len(seeds)/2)):
     for seed in range(seeds[index*2], seeds[index*2] + seeds[(index*2)+1]):
-        print(seed)
         soil = transform_number_from_mapping(seed, seedToSoilMapInput)
         fertilizer = transform_number_from_mapping(soil, soilToFertilizerMapInput)
         water = transform_number_from_mapping(fertilizer, fertilizerToWaterMapInput)
