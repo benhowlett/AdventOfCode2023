@@ -59,8 +59,9 @@ for index, line in enumerate(almanac):
 
 seeds = []
 
-for value in seedsInput:
-    seeds.append(int(value))
+for index, value in enumerate(seedsInput):
+    seeds.append([int(value), int(seedsInput[index + 1])])
+    del seedsInput[index + 1]
 
 lowestLocation = 999999999999999999
 
