@@ -1,3 +1,5 @@
+from tqdm import tqdm
+
 def transform_number_from_mapping(number, maps) -> int:
     for map in maps:
         if number >= int(map[1]) and number < int(map[1]) + int(map[2]):
@@ -5,7 +7,12 @@ def transform_number_from_mapping(number, maps) -> int:
             break
     return number
 
-input = open('test', 'r')
+def navigate_maps(seed, maps) -> int:
+    for map in maps:
+        seed = transform_number_from_mapping(seed, map)
+    return seed
+
+input = open('input', 'r')
 almanac = input.readlines()
 
 seedsInput = []
@@ -57,6 +64,16 @@ for index, line in enumerate(almanac):
                 tempIndex += 1
                 humToLocMapInput.append(almanac[tempIndex].strip().split())
 
+maps = [
+    seedToSoilMapInput,
+    soilToFertilizerMapInput,
+    fertilizerToWaterMapInput,
+    waterToLightMapInput,
+    lightToTempMapInput,
+    tempToHumMapInput,
+    humToLocMapInput
+]
+
 seeds = []
 
 for index, value in enumerate(seedsInput):
@@ -65,17 +82,10 @@ for index, value in enumerate(seedsInput):
 
 lowestLocation = 999999999999999999
 
-for index in range(int(len(seeds)/2)):
-    for seed in range(seeds[index*2], seeds[index*2] + seeds[(index*2)+1]):
-        soil = transform_number_from_mapping(seed, seedToSoilMapInput)
-        fertilizer = transform_number_from_mapping(soil, soilToFertilizerMapInput)
-        water = transform_number_from_mapping(fertilizer, fertilizerToWaterMapInput)
-        light = transform_number_from_mapping(water, waterToLightMapInput)
-        temp = transform_number_from_mapping(light, lightToTempMapInput)
-        hum = transform_number_from_mapping(temp, tempToHumMapInput)
-        loc = transform_number_from_mapping(hum, humToLocMapInput)
-        if loc < lowestLocation:
-            lowestLocation = loc
+for index in tqdm(range(len(seeds))):
+    for seed in tqdm(range(seeds[index][0], seeds[index][0] + seeds[index][1])):
+        transformedSeedNumber = navigate_maps(seed, maps)
+        if transformedSeedNumber < lowestLocation: lowestLocation = transformedSeedNumber
 
 print(lowestLocation)
 
