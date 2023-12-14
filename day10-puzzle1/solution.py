@@ -1,5 +1,6 @@
 class Node:
-    def __init__(self, loc, connections):
+    def __init__(self, symbol, loc, connections):
+        self.symbol = symbol
         self.loc = loc
         self.connections = connections
 
@@ -8,7 +9,7 @@ class Path:
         self.nodes = [start]
     
     def get_path_len(self) -> int:
-        return len(self.nodes - 1)
+        return len(self.nodes) - 1
     
     def add_node_to_path(self, node):
         self.nodes.append(node)
@@ -16,27 +17,37 @@ class Path:
     def get_current_node(self) -> Node:
         return self.nodes[-1]
 
-    def get_node_before(self, node):
-        for i in range(len(self.nodes)):
-            if self.nodes[i] == node: return self.nodes[i - 1]
-        return 0
+    def get_previous_node_loc(self):
+        return self.nodes[-2].loc
     
-def get_connections(symbol):
+    def get_next_node_loc(self):
+        print("Next node location info\n", self.nodes[-1].connections)
+        for connection in self.nodes[-1].connections:
+            for node in self.nodes:
+                print(node.loc)
+            print("current node loc:", self.nodes[-1].loc)
+            print("connection in current node:", connection)
+            print("previous node loc:", self.nodes[-2].loc)
+            if connection != self.nodes[-2].loc: 
+                return connection
+        return ()
+
+def get_connections(symbol, loc):
     match symbol:
         case '|':
-            return [True, False, True, False]
+            return [(loc[0] - 1, loc[1]), (loc[0] + 1, loc[1])]
         case '-':
-            return [False, True, False, True]
+            return [(loc[0], loc[1] + 1), (loc[0], loc[1] - 1)]
         case 'L':
-            return [True, True, False, False]
+            return [(loc[0] - 1, loc[1]), (loc[0], loc[1] + 1)]
         case 'J':
-            return [True, False, False, True]
+            return [(loc[0] - 1, loc[1]), (loc[0], loc[1] - 1)]
         case '7':
-            return [False, False, True, True]
+            return [(loc[0] + 1, loc[1]), (loc[0], loc[1] - 1)]
         case 'F':
-            return [False, True, True, False]
+            return [(loc[0], loc[1] + 1), (loc[0] + 1, loc[1])]
         case _:
-            return [False, False, False, False]
+            return []
 
 input = open('test.txt', 'r')
 
@@ -45,9 +56,32 @@ map = []
 for line in input:
     map.append(list(line.strip()))
 
+startLoc = ()
+
 for i in range(len(map)):
     for j in range(len(map[i])):
-        map[i][j] = Node((i, j), get_connections(map[i][j]))
+        if map[i][j] == "S": startLoc = (i, j)
+        map[i][j] = Node(map[i][j], (i, j), get_connections(map[i][j], (i, j)))
 
-for node in map[0]:
-    print(node.loc, node.connections)
+startConnections = []
+
+for i in range(len(map)):
+    for j in range(len(map[i])):
+        for connection in map[i][j].connections:
+            if connection == startLoc: startConnections.append(map[i][j].loc)
+map[startLoc[0]][startLoc[1]].connections = startConnections
+
+paths = [Path(map[startLoc[0]][startLoc[1]]), Path(map[startLoc[0]][startLoc[1]].connections)]
+
+for i, path in enumerate(paths):
+    for connection in map[startLoc[0]][startLoc[1]].connections:
+        paths[i].add_node_to_path(map[connection[0]][connection[1]])
+        # print(path.get_path_len())
+
+foundMaxPath = False
+
+print(paths[0].get_current_node().loc, paths[0].get_next_node_loc(), startLoc)
+
+while not paths[0].get_next_node_loc() == startLoc:
+    print(paths[0].get_current_node().loc)
+    paths[0].add_node_to_path(map[paths[0].get_next_node_loc()[0]][paths[0].get_next_node_loc()[0]])
